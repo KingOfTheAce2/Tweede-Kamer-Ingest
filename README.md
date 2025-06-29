@@ -251,3 +251,6 @@ weer behoren tot een kamerstukdossier.
 
 ## Besluit
 ### Stemming
+
+## Batch export to HuggingFace
+Use `hf_ingest.py` to fetch document batches directly from the SyncFeed and upload them to a HuggingFace dataset. The script stores progress in `progress.sqlite3` so repeated runs only fetch new entries.
