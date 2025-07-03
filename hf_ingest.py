@@ -208,7 +208,7 @@ def push_to_hf(docs: List[Dict[str, str]], repo_id: str) -> None:
 if __name__ == "__main__":
     category = "Document" 
     
-    hf_repo_id = os.getenv("HF_REPO_ID", "user/ingest") 
+    hf_repo_id = os.getenv("HF_REPO_ID", "vGassen/Dutch-Tweede-Kamer") 
     print(f"Hugging Face Repository ID: {hf_repo_id}")
     
     batch = fetch_all_docs(category)
