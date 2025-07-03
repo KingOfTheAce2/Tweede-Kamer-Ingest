@@ -29,7 +29,7 @@ jobs:
     - name: Run data ingestion script and upload to Hugging Face
       env:
         HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        HF_REPO_ID: 'user/ingest' 
+        HF_REPO_ID: 'vGassen/Dutch-Tweede-Kamer' 
       run: |
         python hf_ingest.py
 
