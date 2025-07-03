@@ -5,7 +5,10 @@ from lxml import etree
 from datasets import Dataset
 from huggingface_hub import HfApi
 import os
-from typing import List, Dict, Optional # Import Optional
+from typing import List, Dict, Optional  # Import Optional
+
+# Namespace dictionary for Atom feeds
+ATOM = {"atom": "http://www.w3.org/2005/Atom"}
 
 
 DB_PATH = "progress.sqlite3"
@@ -60,8 +63,8 @@ def fetch_all_docs(category: str) -> List[Dict[str, str]]:
             break # Exit loop on API error
 
         root = etree.fromstring(resp.content)
-        
-        entries = root.findall(".//entry")
+
+        entries = root.findall(".//atom:entry", namespaces=ATOM)
         entry_count = len(entries)
         print(f"API returned {entry_count} entries in this batch.")
         
@@ -70,7 +73,7 @@ def fetch_all_docs(category: str) -> List[Dict[str, str]]:
 
         for entry in entries:
             # Extract next skiptoken from link rel="next" if available
-            for link in entry.findall("link"): # Check links within entries first for next skiptoken
+            for link in entry.findall("atom:link", namespaces=ATOM):  # Check links within entries first for next skiptoken
                 if link.get("rel") == "next":
                     href = link.get("href")
                     if "skiptoken=" in href:
@@ -80,9 +83,9 @@ def fetch_all_docs(category: str) -> List[Dict[str, str]]:
                             print(f"Found next skiptoken in entry: {current_skiptoken}")
                         except ValueError:
                             pass
-            
+
             enclosure_url = None
-            for link in entry.findall("link"): # Find enclosure link
+            for link in entry.findall("atom:link", namespaces=ATOM):  # Find enclosure link
                 if link.get("rel") == "enclosure":
                     enclosure_url = link.get("href")
                     break
@@ -107,7 +110,7 @@ def fetch_all_docs(category: str) -> List[Dict[str, str]]:
         
         # Check for next link at the feed level as well, if not found in entries
         if not next_link_found:
-            feed_next_link = root.find("{http://www.w3.org/2005/Atom}link[@rel='next']")
+            feed_next_link = root.find("atom:link[@rel='next']", namespaces=ATOM)
             if feed_next_link is not None:
                 href = feed_next_link.get("href")
                 if "skiptoken=" in href:
