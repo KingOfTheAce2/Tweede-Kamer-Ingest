@@ -149,15 +149,18 @@ def push_to_hf(docs: List[Dict[str, str]], repo_id: str) -> None:
     api = HfApi()
     
     try:
-        # Use Dataset.from_list directly and then its export method
+        # The datasets library does not always provide an 'export' helper,
+        # so we convert to a pandas DataFrame and store a temporary CSV file
         ds = Dataset.from_list(docs)
-        with ds.export("data.csv", format="csv", index=False) as dataset_export:
-            api.upload_file(
-                path_or_fileobj=dataset_export.path, # Correctly use the path from the export context
-                path_in_repo="data/latest.csv",
-                repo_id=repo_id,
-                repo_type="dataset",
-            )
+        csv_path = "data.csv"
+        ds.to_pandas().to_csv(csv_path, index=False)
+
+        api.upload_file(
+            path_or_fileobj=csv_path,
+            path_in_repo="data/latest.csv",
+            repo_id=repo_id,
+            repo_type="dataset",
+        )
         print(f"Successfully uploaded data to {repo_id}!")
     except Exception as e:
         print(f"Error uploading to Hugging Face: {e}")
